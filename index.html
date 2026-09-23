@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wordle </title>
+    <title>Wordle Copy Made</title>
     <style>
       :root {
         --bg: #121213;
@@ -252,31 +252,24 @@
 
         rows.forEach((row, rowIndex) => {
           const tiles = [...row.children];
+          const activeGuess = rowIndex === currentRow ? currentGuess : guesses[rowIndex] || '';
 
           for (let colIndex = 0; colIndex < WORD_LENGTH; colIndex += 1) {
             const tile = tiles[colIndex];
             tile.classList.remove('filled', 'correct', 'present', 'absent');
-            const guess = guesses[rowIndex] || '';
-            const letter = guess[colIndex] || '';
+            tile.textContent = '';
 
-            if (rowIndex < currentRow || rowIndex === currentRow && currentGuess.length > colIndex) {
+            if (!activeGuess[colIndex]) continue;
+
+            tile.textContent = activeGuess[colIndex];
+
+            if (rowIndex < currentRow || (rowIndex === currentRow && activeGuess.length > colIndex)) {
               tile.classList.add('filled');
-            }
-
-            if (letter) {
-              tile.textContent = letter;
-            } else {
-              tile.textContent = '';
             }
 
             if (rowIndex < currentRow) {
               const result = evaluateGuess(guesses[rowIndex]);
               tile.classList.add(result[colIndex]);
-            }
-
-            if (rowIndex === currentRow && rowIndex < MAX_GUESSES && currentGuess.length > colIndex) {
-              tile.textContent = currentGuess[colIndex];
-              tile.classList.add('filled');
             }
           }
         });
@@ -344,13 +337,9 @@
         const result = evaluateGuess(currentGuess);
         markKeyboard(currentGuess, result);
 
-        const currentTiles = [...document.querySelectorAll('.row')][currentRow].children;
-        Array.from(currentTiles).forEach((tile, index) => {
-          tile.classList.add(result[index]);
-        });
-
         if (currentGuess === targetWord) {
           gameOver = true;
+          renderBoard();
           setStatus('You win!');
           return;
         }
@@ -360,10 +349,12 @@
 
         if (currentRow >= MAX_GUESSES) {
           gameOver = true;
+          renderBoard();
           setStatus(`Out of tries! The word was ${targetWord}.`);
           return;
         }
 
+        renderBoard();
         setStatus('');
       }
 
